@@ -1,8 +1,8 @@
 # HTTP/2 Pre-Fetch for TYPO3
 
-[![Latest Version on Packagist]][link-packagist]
-[![Software License][ico-license]](LICENSE.md)
-[![Build Status][ico-travis]][link-travis]
+[Latest Version on Packagist][link-packagist]
+[Software License](LICENSE.md)
+[Build Status][link-travis]
 
 This TYPO3 extension fetches all CSS and JS resources that are used
 for a page-rendering and sends additional HTTP/2 Headers "Link" for each resource
