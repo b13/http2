@@ -1,0 +1,44 @@
+{
+	"name": "b13/http2",
+	"type": "typo3-cms-extension",
+	"description": "Speed up TYPO3 rendering via HTTP/2 Server Push",
+	"require": {
+		"php": "^7.0",
+		"typo3/cms-core": "^7.6 || ^8.7 || ^9.5",
+		"typo3/cms-frontend": "^7.6 || ^8.7 || ^9.5"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "~7.0",
+		"squizlabs/php_codesniffer": "^2.3"
+	},
+	"homepage": "https://b13.com",
+	"license": ["GPL-2.0-or-later"],
+	"authors": [{
+		"name": "Benni Mack",
+		"email": "benni@b13.com",
+		"role": "Maintainer"
+	}],
+	"replace": {
+		"http2": "self.version"
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "http2"
+		}
+	},
+	"autoload": {
+		"psr-4": {
+			"B13\\Http2\\": "Classes"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"B13\\Http2\\Tests\\": "Tests"
+		}
+	},
+	"scripts": {
+		"test": "phpunit",
+		"check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 Classes Tests",
+		"fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 Classes Tests"
+	}
+}

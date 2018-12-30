@@ -1,0 +1,5 @@
+Build
+composer.lock
+vendor
+public
+.phpunit.result.cache
