@@ -51,5 +51,6 @@ libraries.
 As this is a PHP project, extending TYPO3, all code is licensed as GPL v2+.
 
 
+[link-author]: https://github.com/bmack
 [link-packagist]: https://packagist.org/packages/b13/http2
 [link-travis]: https://travis-ci.org/b13/http2
