@@ -28,10 +28,7 @@ class ResourceMatcher
         }
         $matches = [];
         preg_match_all(
-            '/<script[\/\s\w-="]*src=' . $this->resourcePattern . '[^>]*>'
-            . '|' .
-            '<link[\/\s\w-="]*href=' . $this->resourcePattern . '[^>]*>'
-            . '/ui',
+            $this->getPatternForCurrentPhpVersion(),
             $input,
             $matches
         );
@@ -45,5 +42,23 @@ class ResourceMatcher
             'scripts' => array_values(array_filter($matches[1])),
             'styles' => array_values($styles)
         ];
+    }
+
+    /**
+     * @return string
+     */
+    protected function getPatternForCurrentPhpVersion(): string
+    {
+        if (version_compare(phpversion(), '7.3', '>')) {
+            return '/<script[\/\s\w\-="]*src=' . $this->resourcePattern . '[^>]*>'
+                . '|' .
+                '<link[\/\s\w\-="]*href=' . $this->resourcePattern . '[^>]*>'
+                . '/ui';
+        } else {
+            return '/<script[\/\s\w-="]*src=' . $this->resourcePattern . '[^>]*>'
+                . '|' .
+                '<link[\/\s\w-="]*href=' . $this->resourcePattern . '[^>]*>'
+                . '/ui';
+        }
     }
 }
