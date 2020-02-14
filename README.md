@@ -54,3 +54,7 @@ As this is a PHP project, extending TYPO3, all code is licensed as GPL v2+.
 [link-author]: https://github.com/bmack
 [link-packagist]: https://packagist.org/packages/b13/http2
 [link-travis]: https://travis-ci.org/b13/http2
+
+## Sharing our expertise
+
+[Find more TYPO3 extensions we have developed](https://b13.com/useful-typo3-extensions-from-b13-to-you) that help us deliver value in client projects. As part of the way we work, we focus on testing and best practices to ensure long-term performance, reliability, and results in all our code.
