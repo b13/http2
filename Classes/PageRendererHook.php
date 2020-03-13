@@ -54,12 +54,12 @@ class PageRendererHook
         foreach ($params['footerData'] as $footerData) {
             $allResources = array_merge_recursive($allResources, $this->matcher->match($footerData));
         }
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['jsLibs']));
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['jsFiles']));
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['jsFooterLibs']));
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['jsFooterFiles']));
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['cssLibs']));
-        $allResources = array_merge_recursive($allResources, $this->matcher->match($params['cssFiles']));
+        foreach (['jsLibs', 'jsFiles', 'jsFooterLibs', 'jsFooterFiles', 'cssLibs', 'cssFiles'] as $part) {
+            if (empty($params[$part])) {
+                continue;
+            }
+            $allResources = array_merge_recursive($allResources, $this->matcher->match($params[$part]));
+        }
 
         $allResources['scripts'] = array_unique($allResources['scripts']);
         $allResources['styles'] = array_unique($allResources['styles']);
