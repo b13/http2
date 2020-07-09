@@ -15,7 +15,7 @@ namespace B13\Http2;
  */
 class ResourceMatcher
 {
-    protected $resourcePattern = '[\'"]?([\w\s\/\-:?.]*)["\']?';
+    protected $resourcePattern = '[\'"]?([\w\s\/\=\-:?.]*)["\']?';
 
     /**
      * @param string $input
