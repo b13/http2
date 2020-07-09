@@ -29,6 +29,16 @@ class ResourceMatcherTest extends TestCase
                 ['https://www.example.com/myfile.js'],
                 []
             ],
+            'simple script tag with parameter' => [
+                '<script src="https://www.example.com/myfile.js?foo" />',
+                ['https://www.example.com/myfile.js?foo'],
+                []
+            ],
+            'simple script tag with parameter and value' => [
+                '<script src="https://www.example.com/myfile.js?foo=bar" />',
+                ['https://www.example.com/myfile.js?foo=bar'],
+                []
+            ],
             'multiple script tags' => [
                 '<script src="https://www.example.com/myfile.js" /><link><script src="/myfile.js"></script>',
                 ['https://www.example.com/myfile.js', '/myfile.js'],
