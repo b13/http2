@@ -61,8 +61,8 @@ class PageRendererHook
             $allResources = array_merge_recursive($allResources, $this->matcher->match($params[$part]));
         }
 
-        $allResources['scripts'] = array_unique((array) $allResources['scripts']);
-        $allResources['styles'] = array_unique((array) $allResources['styles']);
+        $allResources['scripts'] = array_unique($allResources['scripts'] ?? []);
+        $allResources['styles'] = array_unique($allResources['styles'] ?? []);
 
         $this->process($allResources);
     }
