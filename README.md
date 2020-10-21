@@ -8,7 +8,7 @@ This TYPO3 extension fetches all CSS and JS resources that are used
 for a page-rendering and sends additional HTTP/2 Headers "Link" for each resource
 resulting in a faster first contentful paint for TYPO3 CMS.
 
-This extension currently runs on TYPO3 v7 LTS, TYPO3 v8 LTS and TYPO3 v9 LTS.
+This extension currently runs on TYPO3 v7 LTS, TYPO3 v8 LTS, TYPO3 v9 LTS and TYPO3 v10 LTS.
 
 ## Installation
 
