@@ -10,6 +10,7 @@ namespace B13\Http2;
  * of the License, or any later version.
  */
 
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
@@ -29,10 +30,10 @@ class ResourcePusher
      */
     public function pushAll(array $resources)
     {
-        foreach ($resources['scripts'] as $resource) {
+        foreach ($resources['scripts'] ?? [] as $resource) {
             $this->addPreloadHeader($resource, 'script');
         }
-        foreach ($resources['styles'] as $resource) {
+        foreach ($resources['styles'] ?? [] as $resource) {
             $this->addPreloadHeader($resource, 'style');
         }
     }
@@ -40,12 +41,12 @@ class ResourcePusher
     /**
      * @param array $params
      * @param TypoScriptFrontendController $typoScriptFrontendController
-     * @internal this is just a hook implementation.
+     * @internal this is just a hook implementation. can be removed when TYPO3 v9 support is removed.
      */
     public function pushForFrontend(array $params, TypoScriptFrontendController $typoScriptFrontendController)
     {
-        $allResources = $typoScriptFrontendController->config['b13/http2'];
-        if (GeneralUtility::getIndpEnv('TYPO3_SSL') && is_array($allResources)) {
+        $allResources = $typoScriptFrontendController->config['b13/http2'] ?? null;
+        if ($this->useHook() && GeneralUtility::getIndpEnv('TYPO3_SSL') && is_array($allResources)) {
             $this->pushAll($allResources);
         }
     }
@@ -59,5 +60,13 @@ class ResourcePusher
     protected function addPreloadHeader(string $uri, string $type)
     {
         header('Link: <' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type, false);
+    }
+
+    protected function useHook(): bool
+    {
+        if (class_exists(Typo3Version::class) && (new Typo3Version())->getMajorVersion() >= 10) {
+            return false;
+        }
+        return true;
     }
 }
