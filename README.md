@@ -8,7 +8,8 @@ This TYPO3 extension fetches all CSS and JS resources that are used
 for a page-rendering and sends additional HTTP/2 Headers "Link" for each resource
 resulting in a faster first contentful paint for TYPO3 CMS.
 
-This extension currently runs on TYPO3 v7 LTS, TYPO3 v8 LTS, TYPO3 v9 LTS and TYPO3 v10 LTS.
+This extension currently runs on TYPO3 v7, TYPO3 v8, TYPO3 v9, TYPO3 v10 and TYPO3 v11,
+and needs PHP 7.0 or higher.
 
 ## Installation
 
@@ -33,11 +34,10 @@ Also, use PHP7 - if you care about performance or supported PHP versions, there 
 1. Hook into the "PageRenderer" API class by fetching the concatenated CSS / JS files, and
 libraries.
 2. If in FE, this is stored within TSFE together with cached data (could be run twice here for non-cached info)
-3. Send to the client via `header()` - in BE directly or in FE at the end of the request.
+3. Send to the client via `header()` - in BE directly or in FE at the end of the request via a PSR-15 middleware (TYPO3 v10+ only).
 
 ## ToDo
 
-* Use Middlewares and PSR-7 for TYPO3 v9
 * Implement options to also allow to define other resources (fonts/images), e.g. via TypoScript.
 * Use proper DTOs instead of arrays.
 

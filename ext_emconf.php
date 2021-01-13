@@ -8,11 +8,11 @@ $EM_CONF[$_EXTKEY] = [
     'state' => 'stable',
     'clearcacheonload' => 1,
     'author' => 'b13 GmbH',
-    'author_email' => 'typo3@b13.de',
+    'author_email' => 'typo3@b13.com',
     'author_company' => 'b13 GmbH',
     'constraints' => [
         'depends' => [
-            'typo3' => '7.6.0-10.99.99',
+            'typo3' => '7.6.0-11.99.99',
         ],
     ],
 ];
