@@ -17,6 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Takes existing accumulated resources and pushes them as HTTP2 <link> headers as middleware.
@@ -36,19 +37,42 @@ class ResourcePusher implements MiddlewareInterface
             /** @var NormalizedParams $normalizedParams */
             $normalizedParams = $request->getAttribute('normalizedParams');
             if (is_array($resources) && $normalizedParams->isHttps()) {
+                // before
+                foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_http2.']['settings.']['before.'] as $resource) {
+                    $path = GeneralUtility::getFileAbsFileName($resource['file']);
+                    $response = $this->addPreloadHeaderToResponse($response, $path, $resource['type'], $resource['rel'], $resource['mime'], $resource['crossorigin']);
+                }
+
                 foreach ($resources['scripts'] ?? []  as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'script');
                 }
                 foreach ($resources['styles'] ?? []  as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'style');
                 }
+
+                // after
+                foreach ($GLOBALS['TSFE']->tmpl->setup['plugin.']['tx_http2.']['settings.']['after.'] as $resource) {
+                    $path = GeneralUtility::getFileAbsFileName($resource['file']);
+                    $response = $this->addPreloadHeaderToResponse($response, $path, $resource['type'], $resource['rel'], $resource['mime'], $resource['crossorigin']);
+                }
             }
         }
         return $response;
     }
 
-    protected function addPreloadHeaderToResponse(ResponseInterface $response, string $uri, string $type): ResponseInterface
+    protected function addPreloadHeaderToResponse(ResponseInterface $response, string $uri, string $type, string $rel = null, string $mimeType = null, string $crossorigin = null): ResponseInterface
     {
-        return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
+        if($rel === null) {
+            $rel = 'preload';
+        }
+        $value = '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=' . $rel . '; as=' . $type;
+        if($mimeType !== null) {
+            $value .= '; type=' . $mimeType;
+        }
+        if($crossorigin !== null) {
+            $value .= '; crossorigin=' . $crossorigin;
+        }
+        return $response->withAddedHeader('Link', $value);
     }
+
 }
