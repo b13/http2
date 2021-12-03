@@ -85,6 +85,6 @@ class PageRendererHook
 
     protected function getTypoScriptFrontendController()
     {
-        return $GLOBALS['TSFE'];
+        return $GLOBALS['TSFE'] ?? null;
     }
 }
