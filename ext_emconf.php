@@ -4,7 +4,7 @@ $EM_CONF[$_EXTKEY] = [
     'title' => 'HTTP2 Server Push Support for TYPO3',
     'description' => '',
     'category' => 'extension',
-    'version' => '1.1.1',
+    'version' => '2.0.0',
     'state' => 'stable',
     'clearcacheonload' => 1,
     'author' => 'b13 GmbH',
@@ -12,7 +12,7 @@ $EM_CONF[$_EXTKEY] = [
     'author_company' => 'b13 GmbH',
     'constraints' => [
         'depends' => [
-            'typo3' => '7.6.0-11.99.99',
+            'typo3' => '10.4.0-12.99.99',
         ],
     ],
 ];
