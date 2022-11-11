@@ -39,19 +39,6 @@ class ResourcePusher
     }
 
     /**
-     * @param array $params
-     * @param TypoScriptFrontendController $typoScriptFrontendController
-     * @internal this is just a hook implementation. can be removed when TYPO3 v9 support is removed.
-     */
-    public function pushForFrontend(array $params, TypoScriptFrontendController $typoScriptFrontendController)
-    {
-        $allResources = $typoScriptFrontendController->config['b13/http2'] ?? null;
-        if ($this->useHook() && GeneralUtility::getIndpEnv('TYPO3_SSL') && is_array($allResources)) {
-            $this->pushAll($allResources);
-        }
-    }
-
-    /**
      * as="{style/script/image}"
      *
      * @param string $uri
@@ -60,13 +47,5 @@ class ResourcePusher
     protected function addPreloadHeader(string $uri, string $type)
     {
         header('Link: <' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type, false);
-    }
-
-    protected function useHook(): bool
-    {
-        if (class_exists(Typo3Version::class) && (new Typo3Version())->getMajorVersion() >= 10) {
-            return false;
-        }
-        return true;
     }
 }
