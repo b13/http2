@@ -50,12 +50,12 @@ class ResourceMatcher
     protected function getPatternForCurrentPhpVersion(): string
     {
         if (version_compare(phpversion(), '7.3', '>')) {
-            return '/<script[\/\s\w\-="]*src=' . $this->resourcePattern . '[^>]*>'
+            return '/<script[\/\s\w\-="]* src=' . $this->resourcePattern . '[^>]*>'
                 . '|' .
                 '<link[\/\s\w\-="]*href=' . $this->resourcePattern . '[^>]*>'
                 . '/ui';
         } else {
-            return '/<script[\/\s\w-="]*src=' . $this->resourcePattern . '[^>]*>'
+            return '/<script[\/\s\w-="]* src=' . $this->resourcePattern . '[^>]*>'
                 . '|' .
                 '<link[\/\s\w-="]*href=' . $this->resourcePattern . '[^>]*>'
                 . '/ui';
