@@ -28,7 +28,7 @@ class ResourceMatcher
         }
         $matches = [];
         preg_match_all(
-            $this->getPatternForCurrentPhpVersion(),
+            $this->getPattern(),
             $input,
             $matches
         );
@@ -47,18 +47,11 @@ class ResourceMatcher
     /**
      * @return string
      */
-    protected function getPatternForCurrentPhpVersion(): string
+    protected function getPattern(): string
     {
-        if (version_compare(phpversion(), '7.3', '>')) {
-            return '/<script[\/\s\w\-="]*src=' . $this->resourcePattern . '[^>]*>'
-                . '|' .
-                '<link[\/\s\w\-="]*href=' . $this->resourcePattern . '[^>]*>'
-                . '/ui';
-        } else {
-            return '/<script[\/\s\w-="]*src=' . $this->resourcePattern . '[^>]*>'
-                . '|' .
-                '<link[\/\s\w-="]*href=' . $this->resourcePattern . '[^>]*>'
-                . '/ui';
-        }
+        return '/<script[\/\s\w\-="]*src=' . $this->resourcePattern . '[^>]*>'
+            . '|' .
+            '<link[\/\s\w\-="]*href=' . $this->resourcePattern . '[^>]*>'
+            . '/ui';
     }
 }
