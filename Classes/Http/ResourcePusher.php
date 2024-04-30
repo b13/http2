@@ -49,6 +49,10 @@ class ResourcePusher implements MiddlewareInterface
 
     protected function addPreloadHeaderToResponse(ResponseInterface $response, string $uri, string $type): ResponseInterface
     {
-        return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
+        if(str_contains($uri, '.mjs')) {
+            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=modulepreload; as=' . $type);
+        } else {
+            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
+        }
     }
 }
