@@ -49,9 +49,9 @@ class ResourceMatcher
      */
     protected function getPattern(): string
     {
-        return '/<script[\/\s\w\-="]*src=' . $this->resourcePattern . '[^>]*>'
+        return '/<script[\/\s\w\-="]*[\s]+src=' . $this->resourcePattern . '[^>]*>'
             . '|' .
-            '<link[\/\s\w\-="]*href=' . $this->resourcePattern . '[^>]*>'
+            '<link[\/\s\w\-="]*[\s]+href=' . $this->resourcePattern . '[^>]*>'
             . '/ui';
     }
 }
