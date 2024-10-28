@@ -1,6 +1,5 @@
 <?php
-declare(strict_types=1);
-
+declare(strict_types = 1);
 namespace B13\Http2\Http;
 
 /*
@@ -32,13 +31,11 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class ResourcePusher implements MiddlewareInterface
 {
-
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
         if (($GLOBALS['TSFE'] ?? null) instanceof TypoScriptFrontendController) {
             $resources = $GLOBALS['TSFE']->config['b13/http2'] ?? null;
-
             /** @var NormalizedParams $normalizedParams */
             $normalizedParams = $request->getAttribute('normalizedParams');
             if (is_array($resources) && $normalizedParams->isHttps()) {
@@ -58,12 +55,10 @@ class ResourcePusher implements MiddlewareInterface
 
     protected function addPreloadHeaderToResponse(ResponseInterface $response, string $uri, string $type): ResponseInterface
     {
-        if (str_contains($uri, '.mjs')) {
-            return $response->withAddedHeader('Link',
-                '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=modulepreload; as=' . $type);
+        if(str_contains($uri, '.mjs')) {
+            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=modulepreload; as=' . $type);
         } else {
-            return $response->withAddedHeader('Link',
-                '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
+            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
         }
     }
 }
