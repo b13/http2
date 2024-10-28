@@ -10,11 +10,14 @@ namespace B13\Http2\Http;
  * of the License, or any later version.
  */
 
+use B13\Http2\Event\ProcessResourcesEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\NormalizedParams;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -36,10 +39,13 @@ class ResourcePusher implements MiddlewareInterface
             /** @var NormalizedParams $normalizedParams */
             $normalizedParams = $request->getAttribute('normalizedParams');
             if (is_array($resources) && $normalizedParams->isHttps()) {
-                foreach ($resources['scripts'] ?? []  as $resource) {
+                $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+                $event = $eventDispatcher->dispatch(new ProcessResourcesEvent($resources));
+                $resources = $event->getResources();
+                foreach ($resources['scripts'] ?? [] as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'script');
                 }
-                foreach ($resources['styles'] ?? []  as $resource) {
+                foreach ($resources['styles'] ?? [] as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'style');
                 }
             }
