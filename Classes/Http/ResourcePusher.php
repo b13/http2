@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
+
 namespace B13\Http2\Http;
 
 /*
@@ -10,11 +11,14 @@ namespace B13\Http2\Http;
  * of the License, or any later version.
  */
 
+use B13\Http2\Event\ProcessResourcesEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\NormalizedParams;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -28,18 +32,23 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class ResourcePusher implements MiddlewareInterface
 {
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
         if (($GLOBALS['TSFE'] ?? null) instanceof TypoScriptFrontendController) {
             $resources = $GLOBALS['TSFE']->config['b13/http2'] ?? null;
+
             /** @var NormalizedParams $normalizedParams */
             $normalizedParams = $request->getAttribute('normalizedParams');
             if (is_array($resources) && $normalizedParams->isHttps()) {
-                foreach ($resources['scripts'] ?? []  as $resource) {
+                $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+                $event = $eventDispatcher->dispatch(new ProcessResourcesEvent($resources));
+                $resources = $event->getResources();
+                foreach ($resources['scripts'] ?? [] as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'script');
                 }
-                foreach ($resources['styles'] ?? []  as $resource) {
+                foreach ($resources['styles'] ?? [] as $resource) {
                     $response = $this->addPreloadHeaderToResponse($response, $resource, 'style');
                 }
             }
@@ -49,10 +58,12 @@ class ResourcePusher implements MiddlewareInterface
 
     protected function addPreloadHeaderToResponse(ResponseInterface $response, string $uri, string $type): ResponseInterface
     {
-        if(str_contains($uri, '.mjs')) {
-            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=modulepreload; as=' . $type);
+        if (str_contains($uri, '.mjs')) {
+            return $response->withAddedHeader('Link',
+                '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=modulepreload; as=' . $type);
         } else {
-            return $response->withAddedHeader('Link', '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
+            return $response->withAddedHeader('Link',
+                '<' . htmlspecialchars(PathUtility::getAbsoluteWebPath($uri)) . '>; rel=preload; as=' . $type);
         }
     }
 }
