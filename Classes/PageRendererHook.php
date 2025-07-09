@@ -1,5 +1,7 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace B13\Http2;
 
 /*
@@ -10,6 +12,8 @@ namespace B13\Http2;
  * of the License, or any later version.
  */
 
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
@@ -22,18 +26,7 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class PageRendererHook
 {
-    /**
-     * @var ResourceMatcher
-     */
-    protected $matcher;
-
-    /**
-     * @param ResourceMatcher|null $matcher
-     */
-    public function __construct(ResourceMatcher $matcher = null)
-    {
-        $this->matcher = $matcher ?: GeneralUtility::makeInstance(ResourceMatcher::class);
-    }
+    public function __construct(protected ResourceMatcher $matcher) {}
 
     /**
      * @param array $params
@@ -42,9 +35,15 @@ class PageRendererHook
      */
     public function accumulateResources(array $params, PageRenderer $pageRenderer)
     {
+        $request = $this->getRequest();
+        if ($request === null) {
+            return;
+        }
         // If this is a second run (non-cached cObjects adding more data), then the existing cached data is fetched
-        if ($this->getTypoScriptFrontendController() instanceof TypoScriptFrontendController) {
-            $allResources = $this->getTypoScriptFrontendController()->config['b13/http2'] ?? [];
+        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
+            /** @var TypoScriptFrontendController $frontendController */
+            $frontendController = $request->getAttribute('frontend.controller');
+            $allResources = $frontendController->config['b13/http2'] ?? [];
         } else {
             $allResources = [];
         }
@@ -64,7 +63,7 @@ class PageRendererHook
         $allResources['scripts'] = array_unique($allResources['scripts'] ?? []);
         $allResources['styles'] = array_unique($allResources['styles'] ?? []);
 
-        $this->process($allResources);
+        $this->process($allResources, $request);
     }
 
     /**
@@ -73,18 +72,20 @@ class PageRendererHook
      *
      * @param array $allResources
      */
-    protected function process(array $allResources)
+    protected function process(array $allResources, ServerRequestInterface $request): void
     {
-        if ($this->getTypoScriptFrontendController() instanceof TypoScriptFrontendController) {
-            $this->getTypoScriptFrontendController()->config['b13/http2'] = $allResources;
+        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
+            /** @var TypoScriptFrontendController $frontendController */
+            $frontendController = $request->getAttribute('frontend.controller');
+            $frontendController->config['b13/http2'] = $allResources;
         } elseif (GeneralUtility::getIndpEnv('TYPO3_SSL')) {
             // Push directly into the TYPO3 Backend, but only if TYPO3 is running in SSL
             GeneralUtility::makeInstance(ResourcePusher::class)->pushAll($allResources);
         }
     }
 
-    protected function getTypoScriptFrontendController()
+    protected function getRequest(): ?ServerRequestInterface
     {
-        return $GLOBALS['TSFE'] ?? null;
+        return $GLOBALS['TYPO3_REQUEST'] ?? null;
     }
 }

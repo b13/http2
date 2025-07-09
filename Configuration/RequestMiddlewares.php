@@ -1,4 +1,5 @@
 <?php
+
 return [
     'frontend' => [
         'b13/http2/push-resources' => [
@@ -7,8 +8,8 @@ return [
                 'typo3/cms-frontend/prepare-tsfe-rendering',
             ],
             'after' => [
-                'typo3/cms-frontend/authentication',
+                'typo3/cms-frontend/tsfe',
             ],
         ],
-    ]
+    ],
 ];
