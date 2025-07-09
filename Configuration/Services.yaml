@@ -1,0 +1,11 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  B13\Http2\:
+    resource: '../Classes/*'
+
+  B13\Http2\PageRendererHook:
+    public: true

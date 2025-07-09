@@ -1,5 +1,7 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace B13\Http2;
 
 /*
@@ -10,10 +12,7 @@ namespace B13\Http2;
  * of the License, or any later version.
  */
 
-use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * Takes existing accumulated resources and pushes them as HTTP2 <link> headers.

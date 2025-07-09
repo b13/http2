@@ -1,5 +1,7 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace B13\Http2;
 
 /*
@@ -35,12 +37,12 @@ class ResourceMatcher
 
         // simple check - should be optimized to include further checks
         $styles = array_filter($matches[2], function ($resource) {
-            return strpos($resource, '.css') !== false;
+            return str_contains($resource, '.css');
         });
 
         return [
             'scripts' => array_values(array_filter($matches[1])),
-            'styles' => array_values($styles)
+            'styles' => array_values($styles),
         ];
     }
 
