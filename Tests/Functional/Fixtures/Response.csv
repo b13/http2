@@ -1,0 +1,9 @@
+"pages"
+,"uid","pid","title","slug"
+,1,0,"root","/"
+"sys_template"
+,"uid","pid","root","config"
+,1,1,1,"page = PAGE
+page.10 = TEXT
+page.includeJS.dummy-js = EXT:frontend/Resources/Public/JavaScript/default_frontend.js
+"

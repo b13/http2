@@ -16,9 +16,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use TYPO3\CMS\Core\Cache\CacheDataCollector;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Utility\PathUtility;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * Takes existing accumulated resources and pushes them as HTTP2 <link> headers as middleware.
@@ -30,15 +32,27 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class ResourcePusher implements MiddlewareInterface
 {
+    public function __construct(
+        #[Autowire(service: 'cache.tx_http2')]
+        private readonly FrontendInterface $cache
+    ) {}
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
-        /** @var TypoScriptFrontendController $frontendController */
-        $frontendController = $request->getAttribute('frontend.controller');
-        $resources = $frontendController->config['b13/http2'] ?? null;
+        $response = $response->withHeader('foo', 'bar');
+
+        /** @var CacheDataCollector $cacheDataCollector */
+        $cacheDataCollector = $request->getAttribute('frontend.cache.collector');
+        $identifier = $cacheDataCollector->getPageCacheIdentifier();
+        $resources = [];
+        if ($this->cache->has($identifier)) {
+            $resources = $this->cache->get($identifier);
+        }
+
         /** @var NormalizedParams $normalizedParams */
         $normalizedParams = $request->getAttribute('normalizedParams');
-        if (is_array($resources) && $normalizedParams->isHttps()) {
+        if (!empty($resources) && $normalizedParams->isHttps()) {
             foreach ($resources['scripts'] ?? [] as $resource) {
                 $response = $this->addPreloadHeaderToResponse($response, $resource, 'script');
             }
