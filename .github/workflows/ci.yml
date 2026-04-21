@@ -1,0 +1,52 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        TYPO3: [ '14' ]
+        php: [ '8.2', '8.5']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up PHP Version
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+
+      - name: Start MySQL
+        run: sudo /etc/init.d/mysql start
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: dependencies-composer-${{ hashFiles('composer.json') }}
+
+      - name: Install composer dependencies
+        run: |
+          composer install --no-progress --no-interaction
+      - name: Phpstan
+        run: vendor/bin/phpstan analyze -c Build/phpstan.neon
+      - name: Phpcsfix
+        run: vendor/bin/php-cs-fixer fix --config=Build/php-cs-fixer.php --dry-run --stop-on-violation --using-cache=no
+      - name: Unit Tests
+        run: |
+          vendor/bin/phpunit -c Build/phpunit/UnitTests.xml Tests/Unit
+      - name: Functional Tests
+        run: |
+          export typo3DatabaseName="typo3";
+          export typo3DatabaseHost="127.0.0.1";
+          export typo3DatabaseUsername="root";
+          export typo3DatabasePassword="root";
+          vendor/bin/phpunit -c Build/phpunit/FunctionalTests.xml Tests/Functional

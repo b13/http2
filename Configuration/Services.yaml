@@ -7,5 +7,7 @@ services:
   B13\Http2\:
     resource: '../Classes/*'
 
-  B13\Http2\PageRendererHook:
-    public: true
+  cache.tx_http2:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['tx_http2']

@@ -13,10 +13,14 @@ namespace B13\Http2;
  */
 
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use TYPO3\CMS\Core\Cache\CacheDataCollector;
+use TYPO3\CMS\Core\Cache\CacheTag;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 /**
  * Hooks into PageRenderer before the rendering is taken care of, and remember the files
@@ -24,9 +28,14 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  *
  * This considers that everything is required, thus is marked as "preload", not via "prefetch".
  */
+#[Autoconfigure(public: true)]
 class PageRendererHook
 {
-    public function __construct(protected ResourceMatcher $matcher) {}
+    public function __construct(
+        #[Autowire(service: 'cache.tx_http2')]
+        private readonly FrontendInterface $cache,
+        protected ResourceMatcher $matcher
+    ) {}
 
     /**
      * @param array $params
@@ -40,10 +49,8 @@ class PageRendererHook
             return;
         }
         // If this is a second run (non-cached cObjects adding more data), then the existing cached data is fetched
-        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            /** @var TypoScriptFrontendController $frontendController */
-            $frontendController = $request->getAttribute('frontend.controller');
-            $allResources = $frontendController->config['b13/http2'] ?? [];
+        if (ApplicationType::fromRequest($request)->isFrontend()) {
+            $allResources = $this->getFromCached($request);
         } else {
             $allResources = [];
         }
@@ -74,14 +81,33 @@ class PageRendererHook
      */
     protected function process(array $allResources, ServerRequestInterface $request): void
     {
-        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
-            /** @var TypoScriptFrontendController $frontendController */
-            $frontendController = $request->getAttribute('frontend.controller');
-            $frontendController->config['b13/http2'] = $allResources;
+        if (ApplicationType::fromRequest($request)->isFrontend()) {
+            $this->addToCached($request, $allResources);
         } elseif (GeneralUtility::getIndpEnv('TYPO3_SSL')) {
             // Push directly into the TYPO3 Backend, but only if TYPO3 is running in SSL
             GeneralUtility::makeInstance(ResourcePusher::class)->pushAll($allResources);
         }
+    }
+
+    protected function getFromCached(ServerRequestInterface $request): array
+    {
+        /** @var CacheDataCollector $cacheDataCollector */
+        $cacheDataCollector = $request->getAttribute('frontend.cache.collector');
+        $identifier = $cacheDataCollector->getPageCacheIdentifier();
+        if ($this->cache->has($identifier)) {
+            return $this->cache->get($identifier);
+        }
+        return [];
+    }
+
+    protected function addToCached(ServerRequestInterface $request, array $data): void
+    {
+        /** @var CacheDataCollector $cacheDataCollector */
+        $cacheDataCollector = $request->getAttribute('frontend.cache.collector');
+        $identifier = $cacheDataCollector->getPageCacheIdentifier();
+        $cacheTags = array_map(fn(CacheTag $cacheTag) => $cacheTag->name, $cacheDataCollector->getCacheTags());
+        $cacheTimeout = $cacheDataCollector->resolveLifetime();
+        $this->cache->set($identifier, $data, $cacheTags, $cacheTimeout);
     }
 
     protected function getRequest(): ?ServerRequestInterface
