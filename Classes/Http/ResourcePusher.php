@@ -40,7 +40,6 @@ class ResourcePusher implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
-        $response = $response->withHeader('foo', 'bar');
 
         /** @var CacheDataCollector $cacheDataCollector */
         $cacheDataCollector = $request->getAttribute('frontend.cache.collector');
