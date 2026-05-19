@@ -43,7 +43,12 @@ class ResourcePusher implements MiddlewareInterface
 
         /** @var CacheDataCollector $cacheDataCollector */
         $cacheDataCollector = $request->getAttribute('frontend.cache.collector');
-        $identifier = $cacheDataCollector->getPageCacheIdentifier();
+        try {
+            $identifier = $cacheDataCollector->getPageCacheIdentifier();
+        } catch (\LogicException) {
+            // this happens on hidden pages (and ends anyway in a 404 Response)
+            return $response;
+        }
         $resources = [];
         if ($this->cache->has($identifier)) {
             $resources = $this->cache->get($identifier);

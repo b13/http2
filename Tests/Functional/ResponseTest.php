@@ -37,4 +37,14 @@ class ResponseTest extends FunctionalTestCase
         self::assertStringContainsString('JavaScript/default_frontend.js', $link);
         self::assertStringContainsString('>; rel=preload; as=script', $link);
     }
+
+    #[Test]
+    public function return404ResponseForHiddenPage(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/HiddenPage.csv');
+        $request = new InternalRequest('http://localhost/');
+        $request = $request->withServerParams(['HTTPS' => 'on']);
+        $response = $this->executeFrontendSubRequest($request);
+        self::assertSame(404, $response->getStatusCode());
+    }
 }
