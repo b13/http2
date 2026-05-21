@@ -12,6 +12,8 @@ namespace B13\Http2;
  * of the License, or any later version.
  */
 
+use B13\Http2\Event\BeforeDataAreAddedToCacheEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -34,7 +36,8 @@ class PageRendererHook
     public function __construct(
         #[Autowire(service: 'cache.tx_http2')]
         private readonly FrontendInterface $cache,
-        protected ResourceMatcher $matcher
+        protected ResourceMatcher $matcher,
+        protected EventDispatcherInterface $eventDispatcher
     ) {}
 
     /**
@@ -107,6 +110,9 @@ class PageRendererHook
         $identifier = $cacheDataCollector->getPageCacheIdentifier();
         $cacheTags = array_map(fn(CacheTag $cacheTag) => $cacheTag->name, $cacheDataCollector->getCacheTags());
         $cacheTimeout = $cacheDataCollector->resolveLifetime();
+        $beforeDataAreAddedToCacheEvent = new BeforeDataAreAddedToCacheEvent($request, $cacheTags);
+        $this->eventDispatcher->dispatch($beforeDataAreAddedToCacheEvent);
+        $cacheTags = $beforeDataAreAddedToCacheEvent->cacheTags;
         $this->cache->set($identifier, $data, $cacheTags, $cacheTimeout);
     }
 
