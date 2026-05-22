@@ -23,7 +23,7 @@
 	"extra": {
 		"typo3/cms": {
 			"extension-key": "http2",
-			"version": "4.0.1",
+			"version": "4.1.0",
 			"Package": {
 				"providesPackages": {}
 			}
