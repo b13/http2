@@ -12,12 +12,12 @@ namespace B13\Http2\Event;
  * of the License, or any later version.
  */
 
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 final class BeforeDataAreAddedToCacheEvent
 {
     public function __construct(
-        public readonly RequestInterface $request,
+        public readonly ServerRequestInterface $request,
         public array $cacheTags,
     ) {}
 }
